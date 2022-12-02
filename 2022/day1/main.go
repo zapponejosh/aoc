@@ -36,12 +36,10 @@ func main() {
 			check(err)
 			elfBag = append(elfBag, num)
 		} else {
-			fmt.Println("Elf complete. Add slice \n", elfBag)
 			for _, v := range elfBag {
 				numB += v
 			}
 			if numB > numA {
-				fmt.Println("Elf Wins!")
 				numA = numB
 				elfId = count
 			}
