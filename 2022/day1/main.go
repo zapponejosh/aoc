@@ -4,15 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
-)
-
-var (
-	elfBag []int
-	numA   int
-	numB   int
-	count  = 1
-	elfId  int
 )
 
 func check(e error) {
@@ -21,12 +14,13 @@ func check(e error) {
 	}
 }
 
-func main() {
-
-	file, err := os.Open("input.txt")
-	check(err)
-	defer file.Close()
-
+func part1(file *os.File) {
+	var (
+		numA  int
+		numB  int
+		count = 1
+		elfId int
+	)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -34,11 +28,8 @@ func main() {
 		if len(line) > 0 {
 			num, err := strconv.Atoi(line)
 			check(err)
-			elfBag = append(elfBag, num)
+			numB += num
 		} else {
-			for _, v := range elfBag {
-				numB += v
-			}
 			if numB > numA {
 				numA = numB
 				elfId = count
@@ -46,11 +37,60 @@ func main() {
 			numB = 0
 
 			count++
-			elfBag = nil
 		}
 	}
 	fmt.Printf("The elf carrying the most calroies is elf: %d\n", elfId)
 	fmt.Printf("They are carrying %d calories\n", numA)
-	err = scanner.Err()
+	err := scanner.Err()
 	check(err)
+}
+
+func part2(file *os.File) {
+	var (
+		topElfBags []int
+		totalCals  int
+		newElf     int
+	)
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if len(line) > 0 {
+			num, err := strconv.Atoi(line)
+			check(err)
+			newElf += num
+		} else {
+			topElfBags = append(topElfBags, newElf)
+			sort.Ints(topElfBags)
+
+			if len(topElfBags) > 3 {
+				topElfBags = topElfBags[1:]
+			}
+
+			newElf = 0
+
+		}
+	}
+
+	for _, v := range topElfBags {
+		totalCals += v
+	}
+	fmt.Printf("Top three elves have %d calories\n", totalCals)
+	err := scanner.Err()
+	check(err)
+
+}
+
+func main() {
+
+	file, err := os.Open("input.txt")
+	check(err)
+	defer file.Close()
+
+	part1(file)
+	file.Seek(0, 0)
+	part2(file)
+
 }
