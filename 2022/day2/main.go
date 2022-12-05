@@ -45,6 +45,58 @@ func part1(file *os.File) {
 	err := scanner.Err()
 	check(err)
 }
+func part2(file *os.File) {
+	var (
+		score int
+	)
+	value := map[string]int{
+		"A": 1, // rock
+		"B": 2, // paper
+		"C": 3, // scissors
+		"X": 0, // lost
+		"Y": 3, // draw
+		"Z": 6, // win
+	}
+
+	// X is Lose
+	// Y is draw
+	// Z is win
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		opp := string(line[0])
+		result := string(line[2])
+		score += value[result]
+
+		if result == "Y" { // draw
+			score += value[opp]
+		} else if result == "Z" { // win
+			switch opp {
+			case "A":
+				score += 2 // Paper beats rock
+			case "B":
+				score += 3 // Scissors beats paper
+			case "C":
+				score += 1 // rock beats scissors
+			}
+		} else { // lose
+			switch opp {
+			case "A":
+				score += 3 // Rock beats scissors
+			case "B":
+				score += 1 // Paper beats rock
+			case "C":
+				score += 2 // Scissors beats paper
+			}
+		}
+
+	}
+	fmt.Println(score)
+	err := scanner.Err()
+	check(err)
+}
 
 func main() {
 	file, err := os.Open("input.txt")
@@ -52,4 +104,6 @@ func main() {
 	defer file.Close()
 
 	part1(file)
+	file.Seek(0, 0)
+	part2(file)
 }
