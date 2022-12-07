@@ -14,22 +14,18 @@ func check(e error) {
 }
 
 func findCommonItems(stringSacks ...string) string {
-	// sackCount := len(stringSacks)
+	sackCount := len(stringSacks)
 	itemMap := make(map[string]int)
 	// loop over each string set
 	for i, strs := range stringSacks {
 		var unique string
-		for _, v := range strs {
-			if !strings.Contains(unique, string(v)) {
-				unique = unique + string(v)
+		for _, itm := range strs {
+			if strings.Contains(unique, string(itm)) {
+				continue
 			}
-		}
-		for _, itm := range unique {
+			unique += string(itm)
 			v, _ := itemMap[string(itm)]
 
-			// if it's already in there we need to continue to the next string
-			// but if it's there from a previous string we need to keep going!
-			// what if i de-dup every string first?
 			if v < i+1 {
 				itemMap[string(itm)]++
 			}
@@ -37,13 +33,12 @@ func findCommonItems(stringSacks ...string) string {
 		}
 	}
 	// iterate over map
-	// var commonItem string
 	for v := range itemMap {
-		if itemMap[v] == 3 {
+		if itemMap[v] == sackCount {
 			return v
 		}
 	}
-	return "NOOOO"
+	return ""
 }
 
 func part1(file *os.File) {
@@ -52,26 +47,16 @@ func part1(file *os.File) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		var commonItm string
-		items := make(map[string]int)
 		rucksack := scanner.Text()
 		size := len(rucksack)
-		// what if it's and odd number of items?
 		compartment1 := rucksack[:(size / 2)]
 		compartment2 := rucksack[(size / 2):]
 
-		//could make this its own func
-		for _, itm := range compartment1 {
-			items[string(itm)] = 1 // should never be more than one because we only care if it's in both compartments
-		}
-		for _, v := range compartment2 {
-			if _, ok := items[string(v)]; ok {
-				commonItm = string(v)
-			}
-		}
+		commonItm = findCommonItems(compartment1, compartment2)
 		ItmPriority := strings.Index(priority, commonItm)
 		prioritySum += (ItmPriority + 1)
 	}
-	fmt.Println(prioritySum)
+	fmt.Println("Part 1: ", prioritySum)
 	err := scanner.Err()
 	check(err)
 }
@@ -92,13 +77,11 @@ func part2(file *os.File) {
 			commonItem := findCommonItems(elves...)
 			ItmPriority := strings.Index(priority, commonItem)
 			prioritySum += (ItmPriority + 1)
-			fmt.Println(commonItem)
 			count = 1
 			elves = nil
 		}
 	}
-	fmt.Println(prioritySum)
-	// fmt.Println(prioritySum)
+	fmt.Println("Part 2: ", prioritySum)
 	err := scanner.Err()
 	check(err)
 }
