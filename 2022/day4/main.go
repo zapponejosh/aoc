@@ -31,17 +31,10 @@ func part2(file *os.File) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		row := scanner.Text()
-		before, after, found := strings.Cut(row, ",")
-		if !found {
-			check(errors.New("separator not found"))
-			panic("Dangit")
-		}
-		area1 := strings.Split(before, "-")
-		area2 := strings.Split(after, "-")
-		// area1[0] <= area2[0] && area2[0] <= area1[1]
-		// area2[0] <= area1[0] && area1[0] <= area2[1]
+		area1, area2, err := parseRow(row)
+		check(err)
 
-		if (strToInt(area1[0]) <= strToInt(area2[0]) && strToInt(area2[0]) <= strToInt(area1[1])) || (strToInt(area2[0]) <= strToInt(area1[0]) && strToInt(area1[0]) <= strToInt(area2[1])) {
+		if (area1[0] <= area2[0] && area2[0] <= area1[1]) || (area2[0] <= area1[0] && area1[0] <= area2[1]) {
 			overlapCounter += 1
 			continue
 		}
@@ -55,18 +48,13 @@ func part1(file *os.File) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		row := scanner.Text()
-		before, after, found := strings.Cut(row, ",")
-		if !found {
-			check(errors.New("separator not found"))
-			panic("Dangit")
-		}
-		area1 := strings.Split(before, "-")
-		area2 := strings.Split(after, "-")
-		if strToInt(area1[0]) <= strToInt(area2[0]) && strToInt(area1[1]) >= strToInt(area2[1]) {
+		area1, area2, err := parseRow(row)
+		check(err)
+		if area1[0] <= area2[0] && area1[1] >= area2[1] {
 			containsCounter += 1
 			continue // if the areas are identical
 		}
-		if strToInt(area2[0]) <= strToInt(area1[0]) && strToInt(area2[1]) >= strToInt(area1[1]) {
+		if area2[0] <= area1[0] && area2[1] >= area1[1] {
 			containsCounter += 1
 		}
 	}
@@ -77,4 +65,35 @@ func strToInt(s string) int {
 	ret, err := strconv.Atoi(s)
 	check(err)
 	return ret
+}
+
+func parseRow(row string) ([]int, []int, error) {
+	before, after, found := strings.Cut(row, ",")
+	if !found {
+		return nil, nil, errors.New("Separator not found")
+	}
+	firstS := strings.Split(before, "-")
+	secondS := strings.Split(after, "-")
+
+	firstI, err := convertToInts(firstS)
+	if err != nil {
+		return nil, nil, err
+	}
+	secondI, err := convertToInts(secondS)
+	if err != nil {
+		return nil, nil, err
+	}
+	return firstI, secondI, nil
+}
+func convertToInts(s []string) ([]int, error) {
+	var ret []int
+	for _, v := range s {
+		num, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, num)
+
+	}
+	return ret, nil
 }
